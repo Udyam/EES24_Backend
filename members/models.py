@@ -17,7 +17,7 @@ class CustomUserManager(BaseUserManager):
 		user.save()
 		return user
 
-	def create_superuser(self, email, password=None):
+	def create_superuser(self, email, password=None,**extra_fields):
 		if not email:
 			raise ValueError('A user email is needed.')
 
@@ -39,7 +39,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 	is_staff = models.BooleanField(default=False)
 	date_joined = models.DateField(auto_now_add=True)
 	USERNAME_FIELD = 'email'
-	REQUIRED_FIELDS = ['username']
+	REQUIRED_FIELDS = []
 	objects = CustomUserManager()
 
 	def __str__(self):
