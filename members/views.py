@@ -11,6 +11,8 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from .utils import generate_access_token
 import jwt
+from .models import *
+from .serializers import UserSerializer
 
 
 
@@ -109,3 +111,19 @@ class UserLogoutViewAPI(APIView):
 			'message': 'User is already logged out.'
 		}
 		return response
+
+import pandas as pd
+from django.conf import settings
+import uuid
+class ExportImportExcel(APIView):
+
+	def get(self, request, format=None):
+		user_objs = User.objects.all()
+		serializer = UserSerializer(user_objs, many=True)
+		df = pd.DataFrame(serializer.data)
+		print(df)
+		df.to_csv(f"C:/Users/Public/Documents/{uuid.uuid4()}.csv",encoding="UTF-8")
+
+		return Response({'status': 200})
+
+

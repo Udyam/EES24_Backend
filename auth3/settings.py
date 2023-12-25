@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'allauth',
     'allauth.account',
+    'rest_framework.authtoken',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google'
 ]
@@ -152,3 +153,11 @@ AUTHENTICATION_BACKENDS = (
 
 LOGIN_REDIRECT_URL = '/swagger'
 LOGOUT_REDIRECT_URL = '/swagger'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'divyanshiitbhu@gmail.com'
+EMAIL_HOST_PASSWORD = 'robinhood2280'
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
