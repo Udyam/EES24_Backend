@@ -9,13 +9,14 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+from decouple import config
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+STATIC_ROOT = BASE_DIR / 'static'
+#
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -48,16 +49,24 @@ INSTALLED_APPS = [
     'allauth.account',
     'rest_framework.authtoken',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.google'
+    'allauth.socialaccount.providers.google',
+    'ckeditor',
+    'ckeditor_uploader',
+    'rest_framework_simplejwt',
+    'django_otp',
+    'django_otp.plugins.otp_email',
+
 ]
 
-SOCIALACCOUNT_PROVIDERS  = {
-    "google": {
-        "SCOPE": [
-            "profile",
-            "email"
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
         ],
-        "AUTH_PARAMS": {"access_type": "online"}
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
     }
 }
 MIDDLEWARE = [
@@ -122,6 +131,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -134,6 +146,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+CKEDITOR_BASEPATH = "/my_static/ckeditor/ckeditor/"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
@@ -151,13 +164,33 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend'
 )
 
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+
+        }
+    }
+}
 LOGIN_REDIRECT_URL = '/swagger'
 LOGOUT_REDIRECT_URL = '/swagger'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'divyanshiitbhu@gmail.com'
-EMAIL_HOST_PASSWORD = 'robinhood2280'
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
+
+
+CKEDITOR_UPLOAD_PATH = 'content/ckeditor/'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
