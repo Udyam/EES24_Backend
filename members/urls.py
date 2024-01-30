@@ -1,4 +1,5 @@
 from django.urls import path, include
+from rest_framework.authtoken.views import obtain_auth_token
 from members.views import (
 	UserRegistrationAPIView,
 	UserLoginAPIView,
@@ -6,9 +7,9 @@ from members.views import (
 	UserLogoutViewAPI,
 	ExportImportExcel,
 	BroadCastViewAPI,
-
 	VerifyEmailView,
 	ForgotPassword,
+	UserUpdateAPI,
 	ChangePassword
 )
 
@@ -22,6 +23,7 @@ urlpatterns = [
 	path('broadcast/', BroadCastViewAPI.as_view()),
 	path('user/verify',VerifyEmailView.as_view(),name="user-verify"),
 	path('user/forgot-password', ForgotPassword.as_view(), name="forgot"),
-	path('user/change-password', ChangePassword.as_view(), name="change-password")
+	path('user/change-password', ChangePassword.as_view(), name="change-password"),
+	path('user/update', UserUpdateAPI.as_view(), name="User Update"),
 ]
 
