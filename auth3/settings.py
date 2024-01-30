@@ -9,6 +9,8 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+from datetime import timedelta
+
 from decouple import config
 from pathlib import Path
 
@@ -47,14 +49,12 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'allauth',
     'allauth.account',
-    'rest_framework.authtoken',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'ckeditor',
     'ckeditor_uploader',
     'rest_framework_simplejwt',
-    'django_otp',
-    'django_otp.plugins.otp_email',
+    'rest_framework_simplejwt.token_blacklist',
 
 ]
 
@@ -191,6 +191,13 @@ CKEDITOR_UPLOAD_PATH = 'content/ckeditor/'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
 }
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=50),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
 
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}

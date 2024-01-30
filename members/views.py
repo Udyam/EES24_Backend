@@ -1,19 +1,18 @@
+import random
+from django.core.mail import send_mail
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from members.serializers import UserRegistrationSerializer, BroadCastSerializer
 from rest_framework.views import APIView
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, permissions
-from rest_framework.exceptions import AuthenticationFailed
-from django.contrib.auth import authenticate
-from django.contrib.auth import get_user_model
-from .utils import generate_access_token
-import jwt
 from .models import *
-from .serializers import UserSerializer, VerifyAccountSerializer, OtpPasswordSerializer, EmailSerializer
+from .serializers import UserSerializer, VerifyAccountSerializer, OtpPasswordSerializer, EmailSerializer, \
+    UserUpdateSerializer, UserLoginSerializer
 from .utils import send_email_to_user, send_otp
 import pandas as pd
-from django.conf import settings
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 import uuid
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -38,112 +37,118 @@ class UserRegistrationAPIView(APIView):
             if not phone.isnumeric():
                 return Response('Please enter a valid phone number', status=status.HTTP_400_BAD_REQUEST)
 
-            new_user = serializer.save()
-            user_email = new_user.email
-            send_email_to_user(email=user_email, subject="Your OTP for email verification", plain_message=new_user.otp)
-            if new_user:
-                access_token = generate_access_token(new_user)
-                data = {'access_token': access_token}
-                response = Response(data, status=status.HTTP_201_CREATED)
-                response.set_cookie(key='access_token', value=access_token, httponly=True)
-                return response
+            user = serializer.save()
+            if user.is_active:
+                # Generate JWT token
+                refresh = RefreshToken.for_user(user)
+                token = {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                }
+                return Response({'token': token, 'username': user.email}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class VerifyEmailView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = VerifyAccountSerializer
 
-    def post(request):
-        serializer = VerifyAccountSerializer(data=request.data)
+    def get(self, request):
+        # Generate a new OTP and send it in the response
+        user = request.user
+        otp = str(random.randint(1000, 9999))  # Generate a 6-digit OTP
+
+        # Save the OTP to the user model (you might have a field for it)
+        user.otp = otp
+        user.save()
+
+        # Send email with OTP
+        send_email_to_user(user.email, "Email Verification", f'Your OTP is: {otp}')
+
+        return Response({'message': 'Email sent for verification.', 'otp': otp}, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            email = serializer.validated_data['email']
-            otp2 = serializer.validated_data['otp']
-            user = User.objects.get(email=email)
-            if user.otp != otp2:
-                return Response(
-                    {'message': 'Wrong OTP entered'}
-                )
+            user = request.user
+            otp = serializer.validated_data['otp']
+
+            if user.otp != otp:
+                return Response({'message': 'Wrong OTP entered'}, status=status.HTTP_400_BAD_REQUEST)
+
             user.is_verified = True
+            user.save()
             send_email_to_user(user.email, "Registration Successful",
                                "You've successfully registered and verified for EES")
-            return Response({
-                'message': 'Successfully Verified'
-            })
+
+            return Response({'message': 'Successfully Verified'}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserLoginAPIView(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (AllowAny,)
-
     def post(self, request):
-        email = request.data.get('email', None)
-        user_password = request.data.get('password', None)
+        serializer = UserLoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        if not user_password:
-            raise AuthenticationFailed('A user password is needed.')
+        user = User.objects.get(email=serializer.validated_data['email'])
+        password = serializer.validated_data['password']
+        if not user:
+            return Response("User does not exist")
 
-        if not email:
-            raise AuthenticationFailed('An user email is needed.')
+        if not user.check_password(password):
+            return Response("Wrong password")
 
-        user_instance = authenticate(username=email, password=user_password)
+        if not user.is_verified:
+            return Response({'detail': 'Account not verified. Please verify your account.'},
+                            status=status.HTTP_403_FORBIDDEN)
 
-        if not user_instance:
-            raise AuthenticationFailed('User not found.')
-
-        if user_instance.is_active:
-            user_access_token = generate_access_token(user_instance)
-            response = Response()
-            response.set_cookie(key='access_token', value=user_access_token, httponly=True)
-            response.data = {
-                'access_token': user_access_token
+        if user.is_active:
+            # Generate JWT token
+            refresh = RefreshToken.for_user(user)
+            token = {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
             }
-            return response
+            return Response({'token': token, 'username': user.email}, status=status.HTTP_200_OK)
 
-        return Response({
-            'message': 'Something went wrong.'
-        })
+        return Response({'detail': 'User account is not active.'}, status=status.HTTP_403_FORBIDDEN)
 
 
 class UserViewAPI(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user_token = request.COOKIES.get('access_token')
+        # Get the authenticated user
+        user = request.user
 
-        if not user_token:
-            raise AuthenticationFailed('Unauthenticated user.')
+        # Serialize the user data
+        serializer = UserSerializer(user, context={'request': request})  # Pass the request to include the context
 
-        payload = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
-
-        user_model = get_user_model()
-        user = user_model.objects.filter(user_id=payload['user_id']).first()
-        user_serializer = UserRegistrationSerializer(user)
-        return Response(user_serializer.data)
+        # Return the serialized user data
+        return Response(serializer.data)
 
 
 class UserLogoutViewAPI(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        user_token = request.COOKIES.get('access_token', None)
-        if user_token:
-            response = Response()
-            response.delete_cookie('access_token')
-            response.data = {
-                'message': 'Logged out successfully.'
-            }
-            return response
-        response = Response()
-        response.data = {
-            'message': 'User is already logged out.'
-        }
-        return response
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh_token"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response({"detail": "Logout successful."}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ExportImportExcel(APIView):
-    authentication_classes = (IsAdminUser)
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
 
     def get(self, request, format=None):
         user_objs = User.objects.all()
@@ -156,8 +161,9 @@ class ExportImportExcel(APIView):
 
 
 class BroadCastViewAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
     serializer_class = BroadCastSerializer
-    authentication_classes = (IsAdminUser,)
 
     def post(self, request, format=None):
         serializer = self.serializer_class(data=request.data)
@@ -186,7 +192,7 @@ class ForgotPassword(APIView):
             except ObjectDoesNotExist:
                 return Response({"error": " Email does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
-            otp1 = send_otp(user.email ,"Password Reset OTP")
+            otp1 = send_otp(user.email, "Password Reset OTP")
             user.set_and_hash_otp(str(otp1))
             return Response({"Check Your Mail"})
 
@@ -204,6 +210,10 @@ class ChangePassword(APIView):
             except ObjectDoesNotExist:
                 return Response({"error": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
+            if not user.is_verified:
+                return Response({'detail': 'Account not verified. Please verify your account.'},
+                                status=status.HTTP_403_FORBIDDEN)
+
             # Retrieve the hashed OTP from the database and compare it
             if user.check_otp(serializer.data["otp"]):
                 # OTP is correct, check and change the password
@@ -214,3 +224,20 @@ class ChangePassword(APIView):
                 return Response({"error": "Passwords do not match"})
 
             return Response({"error": "Wrong OTP entered"})
+
+
+class UserUpdateAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        # Get the authenticated user
+        user = request.user
+
+        # Validate and update user data
+        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'User information updated successfully.'})
+        else:
+            return Response(serializer.errors, status=400)

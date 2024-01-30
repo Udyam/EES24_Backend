@@ -8,8 +8,10 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from ckeditor_uploader.fields import RichTextUploadingField
 import hashlib
 import secrets
+
+
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, password=None):
+    def create_user(self, email, password=None,**extra_fields):
         if not email:
             raise ValueError('A user email is needed.')
 
@@ -17,7 +19,7 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('A user password is needed.')
 
         email = self.normalize_email(email)
-        user = self.model(email=email)
+        user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save()
         return user
@@ -36,12 +38,23 @@ class CustomUserManager(BaseUserManager):
         return user
 
 
+YEARS = (
+    ("FIRST", "1st year"),
+    ("SECOND", "2nd year"),
+    ("THIRD", "3rd year"),
+    ("FORTH", "4th year"),
+    ("FIFTH", "5th year"),
+)
+
+
 class User(AbstractBaseUser, PermissionsMixin):
-    user_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True,)
     email = models.EmailField(max_length=100, unique=True)
-    username = models.CharField(max_length=100)
+    username = models.CharField(max_length=100, unique=True)
     phone_number = models.CharField(max_length=10)
     otp = models.CharField(max_length=64, default='', blank=True)
+    college = models.CharField(max_length=100)
+    year = models.CharField(choices=YEARS, max_length=100)
     is_verified = models.BooleanField(default=False)
     password_confirmation = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
@@ -85,5 +98,3 @@ class BroadCast_Email(models.Model):
     class Meta:
         verbose_name = "BroadCast Email to all Member"
         verbose_name_plural = "BroadCast Email"
-
-
