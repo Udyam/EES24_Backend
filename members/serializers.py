@@ -7,12 +7,12 @@ from .models import *
 class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['email', 'username', 'phone_number', 'college', 'year', 'password', 'password_confirmation']
+        fields = ['email', 'name', 'college', 'year', 'password', 'password_confirmation']
 
     def create(self, validated_data):
         user_password = validated_data.get('password', None)
-        db_instance = self.Meta.model(email=validated_data.get('email'), username=validated_data.get('username'),
-                                      phone_number=validated_data.get('phone_number'), college=validated_data.get('college'), year=validated_data.get('year'))
+        db_instance = self.Meta.model(email=validated_data.get('email'), name=validated_data.get('name'),
+                                       college=validated_data.get('college'), year=validated_data.get('year'))
         db_instance.set_password(user_password)
         db_instance.save()
         return db_instance
@@ -26,7 +26,7 @@ class UserLoginSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['email', 'username', 'college', 'year', 'phone_number']
+        fields = ['email', 'name', 'college', 'year']
 
 
 class BroadCastSerializer(serializers.Serializer):
@@ -53,3 +53,9 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['college', 'username', 'year', 'phone_number']
+
+class UserQuerySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserQueries
+        fields = ['name','email','question']
