@@ -9,12 +9,14 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from .models import *
 from .serializers import UserSerializer, VerifyAccountSerializer, OtpPasswordSerializer, EmailSerializer, \
-    UserUpdateSerializer, UserLoginSerializer
+    UserUpdateSerializer, UserLoginSerializer, UserQuerySerializer
 from .utils import send_email_to_user, send_otp
 import pandas as pd
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 import uuid
 from django.core.exceptions import ObjectDoesNotExist
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 
 class UserRegistrationAPIView(APIView):
@@ -31,11 +33,6 @@ class UserRegistrationAPIView(APIView):
         if serializer.is_valid(raise_exception=True):
             if serializer.validated_data['password'] != serializer.validated_data['password_confirmation']:
                 return Response('Passwords do not match', status=status.HTTP_400_BAD_REQUEST)
-            phone = serializer.validated_data['phone_number']
-            if len(phone) != 10:
-                return Response('Enter 10 digit phone number', status=status.HTTP_400_BAD_REQUEST)
-            if not phone.isnumeric():
-                return Response('Please enter a valid phone number', status=status.HTTP_400_BAD_REQUEST)
 
             user = serializer.save()
             if user.is_active:
@@ -241,3 +238,59 @@ class UserUpdateAPI(APIView):
             return Response({'message': 'User information updated successfully.'})
         else:
             return Response(serializer.errors, status=400)
+
+
+class UserQueriesAPI(APIView):
+    def post(self, request):
+        serializer = UserQuerySerializer(data=request.data)
+
+        if serializer.is_valid():
+            # Save the query to the database
+            serializer.save()
+
+            # Save the query to Google Sheets
+            try:
+                # Load credentials from a service account file
+                credentials = ServiceAccountCredentials.from_json_keyfile_name(
+                    "C:\\Users\\LENOVO\\Downloads\\auth3-409007-17840123ac20.json",
+                    ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"],
+                )
+
+                gc = gspread.authorize(credentials)
+
+                # Open the Google Sheets document by key
+                sh = gc.open_by_key("1oPDE5gpf2bpvT5LXtY7Kuw4I3eHJGlI8uteSsuwQNao")
+
+                # Select the first sheet
+                worksheet = sh.get_worksheet(0)
+
+                # Get the data from the serializer
+                query_data = serializer.data.values()
+
+                # Append the data to the Google Sheets
+                worksheet.append_row(list(query_data))
+
+                return Response({"success": "Query submitted successfully"}, status=status.HTTP_201_CREATED)
+
+
+
+            except Exception as e:
+
+        # Add debugging statements
+
+                print(f"Error during Google Sheets interaction: {str(e)}")
+
+        # Capture and return the complete traceback
+
+                import traceback
+
+                traceback_info = traceback.format_exc()
+
+                print(traceback_info)
+
+        # Return the detailed error message
+
+                return Response({"error": f"Error during Google Sheets interaction: {str(e)}", "traceback": traceback_info},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

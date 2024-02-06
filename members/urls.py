@@ -10,7 +10,8 @@ from members.views import (
 	VerifyEmailView,
 	ForgotPassword,
 	UserUpdateAPI,
-	ChangePassword
+	ChangePassword,
+	UserQueriesAPI,
 )
 
 
@@ -25,5 +26,6 @@ urlpatterns = [
 	path('user/forgot-password', ForgotPassword.as_view(), name="forgot"),
 	path('user/change-password', ChangePassword.as_view(), name="change-password"),
 	path('user/update', UserUpdateAPI.as_view(), name="User Update"),
+	path('user/queries',UserQueriesAPI.as_view(), name='User Query'),
 ]
 
