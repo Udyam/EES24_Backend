@@ -11,7 +11,7 @@ import secrets
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, password=None,**extra_fields):
+    def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('A user email is needed.')
 
@@ -38,23 +38,13 @@ class CustomUserManager(BaseUserManager):
         return user
 
 
-YEARS = (
-    ("FIRST", "1st year"),
-    ("SECOND", "2nd year"),
-    ("THIRD", "3rd year"),
-    ("FORTH", "4th year"),
-    ("FIFTH", "5th year"),
-)
-
-
 class User(AbstractBaseUser, PermissionsMixin):
-    id = models.AutoField(primary_key=True,)
+    id = models.AutoField(primary_key=True, )
     email = models.EmailField(max_length=100, unique=True)
-    username = models.CharField(max_length=100, unique=True)
-    phone_number = models.CharField(max_length=10)
+    name = models.CharField(max_length=100, unique=True)
     otp = models.CharField(max_length=64, default='', blank=True)
     college = models.CharField(max_length=100)
-    year = models.CharField(choices=YEARS, max_length=100)
+    year = models.IntegerField()
     is_verified = models.BooleanField(default=False)
     password_confirmation = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
@@ -98,3 +88,13 @@ class BroadCast_Email(models.Model):
     class Meta:
         verbose_name = "BroadCast Email to all Member"
         verbose_name_plural = "BroadCast Email"
+
+
+class UserQueries(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    AskedWhen = models.DateTimeField(auto_now_add=True)
+    question = models.TextField(max_length=200)
+
+    def __str__(self):
+        return self.email
