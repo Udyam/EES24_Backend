@@ -46,18 +46,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'members.apps.MembersConfig',
     'drf_yasg',
+    'udyam',
     'django.contrib.sites',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
-    'social_django',
     'ckeditor',
     "corsheaders",
     'ckeditor_uploader',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-
 ]
 
 SOCIALACCOUNT_PROVIDERS = {
