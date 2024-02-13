@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'members.apps.MembersConfig',
     'drf_yasg',
     'udyam',
+    'allauth',
+    'allauth.account',
     'django.contrib.sites',
     'ckeditor',
     "corsheaders",
