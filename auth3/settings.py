@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-p01^bd+kn6a_hmq99uq%r*gtmz@xqlc9119)t4q8ot7$pevg2i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['eesbackend.onrender.com']
 
 ## custom user model
 AUTH_USER_MODEL = 'members.User'
