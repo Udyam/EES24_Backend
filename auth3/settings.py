@@ -23,11 +23,12 @@ STATIC_ROOT = BASE_DIR / 'static'
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-p01^bd+kn6a_hmq99uq%r*gtmz@xqlc9119)t4q8ot7$pevg2i'
+SECRET_KEY = config('SECRET_KEY', default='')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'RENDER' not in os.environ
 
-ALLOWED_HOSTS = ['eesbackend.onrender.com', '127.0.0.1:8000','127.0.0.1','divyansh2280.pythonanywhere.com']
+ALLOWED_HOSTS = ['127.0.0.1:8000','127.0.0.1','divyansh2280.pythonanywhere.com']
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
@@ -204,7 +205,7 @@ REST_FRAMEWORK = {
     ),
 }
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=50),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
 
