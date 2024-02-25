@@ -9,8 +9,8 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+import os
 from datetime import timedelta
-
 from decouple import config
 from pathlib import Path
 
@@ -24,11 +24,15 @@ STATIC_ROOT = BASE_DIR / 'static'
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-p01^bd+kn6a_hmq99uq%r*gtmz@xqlc9119)t4q8ot7$pevg2i'
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = 'RENDER' not in os.environ
 
-ALLOWED_HOSTS = ['eesbackend.onrender.com']
+ALLOWED_HOSTS = ['eesbackend.onrender.com', '127.0.0.1:8000','127.0.0.1','divyansh2280.pythonanywhere.com']
+
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
 
 ## custom user model
 AUTH_USER_MODEL = 'members.User'
