@@ -16,7 +16,7 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('A user email is needed.')
 
         if not password:
-            raise ValueError('A user password is needed.')
+            password = BaseUserManager.make_random_password(self=BaseUserManager)
 
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
@@ -40,10 +40,10 @@ class CustomUserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=100, unique=True)
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     otp = models.CharField(max_length=64, default='', blank=True)
     college = models.CharField(max_length=100)
-    year = models.IntegerField()
+    year = models.IntegerField(blank=True, null=True)
     is_verified = models.BooleanField(default=False)
     password_confirmation = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)

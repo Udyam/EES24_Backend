@@ -8,6 +8,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from .models import *
+from social_django.models import UserSocialAuth
 from .serializers import UserSerializer, VerifyAccountSerializer, OtpPasswordSerializer, EmailSerializer, \
     UserUpdateSerializer, UserLoginSerializer, UserQuerySerializer
 from .utils import send_email_to_user, send_otp
@@ -123,9 +124,15 @@ class UserViewAPI(APIView):
 
         # Serialize the user data
         serializer = UserSerializer(user, context={'request': request})  # Pass the request to include the context
-
-        # Return the serialized user data
-        return Response(serializer.data)
+        if UserSocialAuth.objects.filter(uid=user).exists():
+            userObj = User.objects.get(email=user)
+            if not userObj.is_verified:
+                userObj.is_verified = True
+                userObj.save()
+            userDetail = UserSocialAuth.objects.get(uid=user).extra_data
+            return Response({"profile" : serializer.data, "google" : userDetail}, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserLogoutViewAPI(APIView):
@@ -294,3 +301,11 @@ class UserQueriesAPI(APIView):
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+# Only for testing. state and code should be 
+class RedirectSocial(APIView):
+
+    def get(self, request):
+        code, state = str(request.GET['code']), str(request.GET['state'])
+        json_obj = {'code': code, 'state': state}
+        return Response(json_obj, status=status.HTTP_201_CREATED)

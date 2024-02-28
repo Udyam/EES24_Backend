@@ -52,7 +52,7 @@ class OtpPasswordSerializer(serializers.Serializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['college', 'username', 'year', 'phone_number']
+        fields = ['college', 'name', 'year']
 
 class UserQuerySerializer(serializers.ModelSerializer):
 

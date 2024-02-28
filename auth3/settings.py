@@ -28,7 +28,7 @@ SECRET_KEY = config('SECRET_KEY', default='')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'RENDER' not in os.environ
 
-ALLOWED_HOSTS = ['127.0.0.1:8000','127.0.0.1','divyansh2280.pythonanywhere.com']
+ALLOWED_HOSTS = ['127.0.0.1:8000','127.0.0.1','divyansh2280.pythonanywhere.com', 'localhost']
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
@@ -60,6 +60,9 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'drf_social_oauth2',
+    'djoser',
+    'social_django',
 ]
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -211,6 +214,29 @@ SIMPLE_JWT = {
 
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_TOKEN_CLASSES': (
+        'rest_framework_simplejwt.tokens.AccessToken',
+    ),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+}
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', default='')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET  = config('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET', default='')
+SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ['first_name', 'last_name','email', 'picture', 'locale']
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile', 'openid']
+
+SOCIAL_AUTH_RAISE_EXCEPTIONS = False
+
+white_list = ['http://localhost:8000/api/statecode/','http://localhost:5000/api/statecode/']
+
+DJOSER = {
+    'LOGIN_FIELD': 'email', # Field we use to login on extended User model
+    'SOCIAL_AUTH_TOKEN_STRATEGY': 'djoser.social.token.jwt.TokenStrategy',
+    'SERIALIZERS': {
+        'current_user': 'users.serializers.UserAccountSerializer'
+    },
+    'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS': white_list # Redirected URL we listen on google console
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
