@@ -64,6 +64,7 @@ class VerifyEmailView(APIView):
         # Send email with OTP
         send_email_to_user(user.email, "Email Verification", f'Your OTP is: {otp}')
 
+        # DON'T SEND OTP IN PRODUCTION !!
         return Response({'message': 'Email sent for verification.', 'otp': otp}, status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -265,7 +266,7 @@ class UserQueriesAPI(APIView):
 
                 gc = gspread.authorize(credentials)
 
-                # Open the Google Sheets document by key
+                # Open the Google Sheets document by key    
                 sh = gc.open_by_key("1oPDE5gpf2bpvT5LXtY7Kuw4I3eHJGlI8uteSsuwQNao")
 
                 # Select the first sheet
