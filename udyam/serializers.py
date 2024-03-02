@@ -42,16 +42,17 @@ class TeamCreateSerializer(serializers.ModelSerializer):
         except User.DoesNotExist:
             raise serializers.ValidationError(f"User with email '{email}' does not exist.")
 
-class UserEmailSerializer(serializers.ModelSerializer):
-    class meta:
-        model = User
-        fields = ['email']
 
 class TeamSerializer(serializers.ModelSerializer):
+    event_name = serializers.ReadOnlyField(source='event.name')
+    leader_email = serializers.EmailField(source='leader.email')
+    member1_email = serializers.EmailField(source='member1.email')
+    member2_email = serializers.EmailField(source='member2.email')
 
     class Meta:
         model = Team
-        fields = ['event', 'team_name', 'leader', 'member1', 'member2']
+        fields = ['event_name', 'team_name', 'leader_email', 'member1_email', 'member2_email']
+
 
 class TeamCountSerializer(serializers.ModelSerializer):
     team_count = serializers.IntegerField()
