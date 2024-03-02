@@ -134,6 +134,19 @@ class UserViewAPI(APIView):
             return Response({"profile" : serializer.data, "google" : userDetail}, status=status.HTTP_200_OK)
         else:
             return Response(serializer.data, status=status.HTTP_200_OK)
+        
+
+class UserSearchViewAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        query = request.GET.get("query")
+        user = request.user
+        # remove requesting user from query set
+        results = User.objects.filter(email__icontains=query)
+        serializer = UserSerializer(results.exclude(email=user), many=True, context = {'request' : request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserLogoutViewAPI(APIView):

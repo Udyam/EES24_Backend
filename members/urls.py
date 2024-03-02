@@ -13,6 +13,7 @@ from members.views import (
 	ChangePassword,
 	UserQueriesAPI,
     RedirectSocial,
+    UserSearchViewAPI
 )
 
 
@@ -20,6 +21,7 @@ urlpatterns = [
 	path('user/register/', UserRegistrationAPIView.as_view()),
 	path('user/login/', UserLoginAPIView.as_view()),
 	path('user/', UserViewAPI.as_view()),
+    path('user/search', UserSearchViewAPI.as_view()), 
 	path('user/logout/', UserLogoutViewAPI.as_view()),
 	path('excel/', ExportImportExcel.as_view()),
 	path('broadcast/', BroadCastViewAPI.as_view()),
