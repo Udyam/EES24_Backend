@@ -40,10 +40,11 @@ class UserRegistrationAPIView(APIView):
                 # Generate JWT token
                 refresh = RefreshToken.for_user(user)
                 token = {
-                    'refresh': str(refresh),
                     'access': str(refresh.access_token),
+                    'refresh': str(refresh),
+                    'user' : user.email
                 }
-                return Response({'token': token, 'username': user.email}, status=status.HTTP_200_OK)
+                return Response(token, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -107,10 +108,11 @@ class UserLoginAPIView(APIView):
             # Generate JWT token
             refresh = RefreshToken.for_user(user)
             token = {
-                'refresh': str(refresh),
                 'access': str(refresh.access_token),
+                'refresh': str(refresh),
+                'user': user.email
             }
-            return Response({'token': token, 'username': user.email}, status=status.HTTP_200_OK)
+            return Response(token, status=status.HTTP_200_OK)
 
         return Response({'detail': 'User account is not active.'}, status=status.HTTP_403_FORBIDDEN)
 
