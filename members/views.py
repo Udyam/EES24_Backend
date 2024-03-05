@@ -213,6 +213,8 @@ class ForgotPassword(APIView):
             otp1 = send_otp(user.email, "Password Reset OTP")
             user.set_and_hash_otp(str(otp1))
             return Response({"Check Your Mail"})
+            
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ChangePassword(APIView):
@@ -237,11 +239,14 @@ class ChangePassword(APIView):
                 # OTP is correct, check and change the password
                 if serializer.data["password1"] == serializer.data["password2"]:
                     user.set_password(serializer.data["password1"])
+                    user.save()
                     return Response({"success": "Password changed successfully"})
 
                 return Response({"error": "Passwords do not match"})
 
             return Response({"error": "Wrong OTP entered"})
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserUpdateAPI(APIView):
