@@ -228,7 +228,7 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['https://www.googleapis.com/auth/userinfo.ema
 
 SOCIAL_AUTH_RAISE_EXCEPTIONS = False
 
-white_list = ['http://localhost:8000/api/statecode/','http://localhost:5000/api/statecode/', 'https://ees2024.pythonanywhere.com/api/statecode/']
+white_list = ['http://localhost:8000/api/statecode/','http://localhost:5000/api/statecode/', 'https://ees2024.pythonanywhere.com/api/statecode/', 'http://localhost:3000/signup']
 
 DJOSER = {
     'LOGIN_FIELD': 'email', # Field we use to login on extended User model
