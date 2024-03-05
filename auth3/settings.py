@@ -224,6 +224,17 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'user_id',
 }
 
+CORS_ALLOWED_ORIGINS = (
+    "http://localhost:3000",
+    "https://ees2024.pythonanywhere.com"
+)
+
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = (
+    'http://localhost:3000',
+)
+
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', default='')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET  = config('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET', default='')
 SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ['first_name', 'last_name','email', 'picture', 'locale']
@@ -252,13 +263,3 @@ DJOSER = {
 #     "POST",
 #     "PUT",
 # )
-
-CORS_ALLOWED_ORIGINS = (
-    "http://localhost:3000",
-)
-
-CORS_ALLOW_CREDENTIALS = True
-
-CSRF_TRUSTED_ORIGINS = (
-    'http://localhost:3000',
-)
