@@ -26,7 +26,7 @@ STATIC_ROOT = BASE_DIR / 'static'
 SECRET_KEY = config('SECRET_KEY', default='')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = 'RENDER' not in os.environ
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
