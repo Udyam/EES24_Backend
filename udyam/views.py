@@ -129,8 +129,12 @@ class TeamInviteAPIView(APIView):
         if self.user_is_part_of_team(member, event):
             return Response({"error": "User is already part of a team for this event."},status=status.HTTP_400_BAD_REQUEST)
         
-        if team.member1 != None and team.member2 != None:
-            return Response({"Error" : "Team is full"}, status=status.HTTP_400_BAD_REQUEST)
+        if event.name in ['digisim', 'ichip', 'commnet', 'xiota']:
+            if team.member1 is not None:
+                return Response({"Error": "Team is full"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if team.member1 is not None and team.member2 is not None:
+            return Response({"Error": "Team is full"}, status=status.HTTP_400_BAD_REQUEST)
         
         # generating email link and sending the email
         link = self.generate_link(team_name, event_name, member_email)
@@ -138,7 +142,7 @@ class TeamInviteAPIView(APIView):
         from_email = settings.EMAIL_HOST_USER
         send_mail("Team Invite", f"Here is the {link} to join {team_name} for the event {event_name}", from_email, (member_email,))
 
-        return Response({'message': 'Email sent for verification.'}, status=status.HTTP_200_OK)
+        return Response({'message': 'Email sent for Invitation.'}, status=status.HTTP_200_OK)
         
     
     def get_user_instance_by_email(self, email):
@@ -210,14 +214,21 @@ class TeamJoinAPIView(APIView):
             return Response({"error": "User is already part of a team for this event."},status=status.HTTP_400_BAD_REQUEST)
         
         # checking if the team is full
-        if team.member1 == None:
-            team.member1 = member
-            team.save()
-        elif team.member2 == None:
-            team.member2 = member
-            team.save()
+        if event.name in ['digisim', 'ichip', 'commnet', 'xiota']:
+            if team.member1 is not None:
+                return Response({"Error": "Team is full"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                team.member1 = member
+
         else:
-            return Response({"Error": "Team is full"}, status=status.HTTP_400_BAD_REQUEST)
+            if team.member1 is None:
+                team.member1 = member
+            elif team.member2 is None:
+                team.member2 = member
+            else:
+                return Response({"Error":"Team is full"})
+
+        team.save()
 
         return Response({"Message" : f"{member_email} successfully joined team"})
 
