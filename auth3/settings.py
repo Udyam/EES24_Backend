@@ -243,7 +243,7 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = (
     "http://localhost:3000",
     "https://ees2024.pythonanywhere.com",
-    "64.227.189.197"
+    "https://64.227.189.197"
 )
 
 CORS_ALLOW_CREDENTIALS = True
