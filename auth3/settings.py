@@ -124,9 +124,9 @@ if PROD:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'myproject',
-            'USER': 'myprojectuser',
-            'PASSWORD': 'password',
+            'NAME': 'ees24backend',
+            'USER': 'samarth',
+            'PASSWORD': 'ees24@Udyam',
             'HOST': 'localhost',
             'PORT': '',
         }
@@ -179,6 +179,7 @@ CKEDITOR_BASEPATH = "/my_static/ckeditor/ckeditor/"
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -241,7 +242,8 @@ SIMPLE_JWT = {
 
 CORS_ALLOWED_ORIGINS = (
     "http://localhost:3000",
-    "https://ees2024.pythonanywhere.com"
+    "https://ees2024.pythonanywhere.com",
+    "64.227.189.197"
 )
 
 CORS_ALLOW_CREDENTIALS = True
