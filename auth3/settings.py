@@ -25,10 +25,14 @@ STATIC_ROOT = BASE_DIR / 'static'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY', default='')
 
+PROD = True
+if PROD:
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = 'RENDER' not in os.environ
+    DEBUG = False
+else:
+    DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1:8000','127.0.0.1','divyansh2280.pythonanywhere.com', 'localhost']
+ALLOWED_HOSTS = ['*']
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
@@ -116,13 +120,24 @@ WSGI_APPLICATION = 'auth3.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if PROD:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'myproject',
+            'USER': 'myprojectuser',
+            'PASSWORD': 'password',
+            'HOST': 'localhost',
+            'PORT': '',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
