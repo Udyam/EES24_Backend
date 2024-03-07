@@ -46,8 +46,8 @@ class TeamCreateSerializer(serializers.ModelSerializer):
 class TeamSerializer(serializers.ModelSerializer):
     event_name = serializers.ReadOnlyField(source='event.name')
     leader_email = serializers.EmailField(source='leader.email')
-    member1_email = serializers.EmailField(source='member1.email')
-    member2_email = serializers.EmailField(source='member2.email')
+    member1_email = serializers.EmailField(source='member1.email', allow_null=True)
+    member2_email = serializers.EmailField(source='member2.email', allow_null=True)
 
     class Meta:
         model = Team
