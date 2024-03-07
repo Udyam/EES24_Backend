@@ -1,0 +1,8 @@
+○ gunicorn.socket - gunicorn socket
+     Loaded: loaded (]8;;file://ees24udyam/etc/systemd/system/gunicorn.socket/etc/systemd/system/gunicorn.socket]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: inactive (dead)
+   Triggers: [0;1;32m●[0m gunicorn.service
+     Listen: /run/gunicorn.sock (Stream)
+
+Mar 06 14:54:06 ees24udyam systemd[1]: [0;1;31m[0;1;39m[0;1;31mgunicorn.socket: Socket service gunicorn.service already active, refusing.[0m
+Mar 06 14:54:06 ees24udyam systemd[1]: [0;1;31m[0;1;39m[0;1;31mFailed to listen on gunicorn.socket - gunicorn socket.[0m
