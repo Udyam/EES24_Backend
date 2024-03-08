@@ -135,7 +135,7 @@ class UserViewAPI(APIView):
             userDetail = UserSocialAuth.objects.get(uid=user).extra_data
             return Response({"profile" : serializer.data, "google" : userDetail}, status=status.HTTP_200_OK)
         else:
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({"profile" : serializer.data} , status=status.HTTP_200_OK)
         
 
 class UserSearchViewAPI(APIView):
