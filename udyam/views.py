@@ -168,7 +168,8 @@ class TeamInviteAPIView(APIView):
         q["event_name"] = event_name
         q["member_email"] = member_email
         # frontend url
-        join_link = "http://localhost:8000/udyam/teams/join?"
+        # join_link = "http://localhost:8000/udyam/teams/join?"
+        join_link = "http://localhost:3000/invite?"
         return join_link + q.urlencode()
         
 
