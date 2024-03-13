@@ -247,13 +247,16 @@ CORS_ALLOWED_ORIGINS = (
     "http://localhost:3000",
     "https://ees2024.pythonanywhere.com",
     "https://64.227.189.197",
-    "https://eesiitbhu.co.in"
+    "https://eesiitbhu.co.in",
+    "https://ees-24-frontend-5zql.vercel.app",
 )
 
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = (
     'http://localhost:3000',
+    "https://ees-24-frontend-5zql.vercel.app",
+    "https://eesiitbhu.co.in",
 )
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', default='')
@@ -263,7 +266,7 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['https://www.googleapis.com/auth/userinfo.ema
 
 SOCIAL_AUTH_RAISE_EXCEPTIONS = False
 
-white_list = ['http://localhost:8000/api/statecode/','http://localhost:5000/api/statecode/', 'https://ees2024.pythonanywhere.com/api/statecode/', 'http://localhost:3000/signup']
+white_list = ['http://localhost:8000/api/statecode/','http://localhost:5000/api/statecode/', 'https://ees2024.pythonanywhere.com/api/statecode/', 'http://localhost:3000/signup', "https://ees-24-frontend-5zql.vercel.app/signup", "https://ees-24-frontend-5zql.vercel.app/login", "https://eesiitbhu.co.in/signup", "https://eesiitbhu.co.in/login"]
 
 DJOSER = {
     'LOGIN_FIELD': 'email', # Field we use to login on extended User model
