@@ -249,6 +249,7 @@ CORS_ALLOWED_ORIGINS = (
     "https://64.227.189.197",
     "https://eesiitbhu.co.in",
     "https://ees-24-frontend-5zql.vercel.app",
+    "https://www.eesiitbhu.co.in",
 )
 
 CORS_ALLOW_CREDENTIALS = True
@@ -257,6 +258,7 @@ CSRF_TRUSTED_ORIGINS = (
     'http://localhost:3000',
     "https://ees-24-frontend-5zql.vercel.app",
     "https://eesiitbhu.co.in",
+    "https://www.eesiitbhu.co.in",
 )
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', default='')
