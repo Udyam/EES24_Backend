@@ -33,7 +33,7 @@ class UserRegistrationAPIView(APIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
             if serializer.validated_data['password'] != serializer.validated_data['password_confirmation']:
-                return Response('Passwords do not match', status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error' : 'Passwords do not match'}, status=status.HTTP_400_BAD_REQUEST)
 
             user = serializer.save()
             if user.is_active:
@@ -66,7 +66,7 @@ class VerifyEmailView(APIView):
         send_email_to_user(user.email, "Email Verification", f'Your OTP is: {otp}')
 
         # DON'T SEND OTP IN PRODUCTION !!
-        return Response({'message': 'Email sent for verification.', 'otp': otp}, status=status.HTTP_200_OK)
+        return Response({'message': 'Email sent for verification.'}, status=status.HTTP_200_OK)
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -75,7 +75,7 @@ class VerifyEmailView(APIView):
             otp = serializer.validated_data['otp']
 
             if user.otp != otp:
-                return Response({'message': 'Wrong OTP entered'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'Wrong OTP entered'}, status=status.HTTP_400_BAD_REQUEST)
 
             user.is_verified = True
             user.save()
@@ -95,13 +95,13 @@ class UserLoginAPIView(APIView):
         user = User.objects.get(email=serializer.validated_data['email'])
         password = serializer.validated_data['password']
         if not user:
-            return Response("User does not exist")
+            return Response({'error' : 'User does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
         if not user.check_password(password):
-            return Response("Wrong password")
+            return Response({'error' : 'Passwords do not match'}, status=status.HTTP_400_BAD_REQUEST)
 
         if not user.is_verified:
-            return Response({'detail': 'Account not verified. Please verify your account.'},
+            return Response({'error': 'Account not verified. Please verify your account.'},
                             status=status.HTTP_403_FORBIDDEN)
 
         if user.is_active:
@@ -114,7 +114,7 @@ class UserLoginAPIView(APIView):
             }
             return Response(token, status=status.HTTP_200_OK)
 
-        return Response({'detail': 'User account is not active.'}, status=status.HTTP_403_FORBIDDEN)
+        return Response({'error' : 'user is not active'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewAPI(APIView):
@@ -160,10 +160,10 @@ class UserLogoutViewAPI(APIView):
             token = RefreshToken(refresh_token)
             token.blacklist()
 
-            return Response({"detail": "Logout successful."}, status=status.HTTP_200_OK)
+            return Response({"message": "Logout successful."}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ExportImportExcel(APIView):
@@ -195,7 +195,7 @@ class BroadCastViewAPI(APIView):
 
         response = Response()
         response.data = {
-            'message': 'Something went wrong.'
+            'error': 'Something went wrong.'
         }
         return response
 
@@ -233,7 +233,7 @@ class ChangePassword(APIView):
                 return Response({"error": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
             if not user.is_verified:
-                return Response({'detail': 'Account not verified. Please verify your account.'},
+                return Response({'error': 'Account not verified. Please verify your account.'},
                                 status=status.HTTP_403_FORBIDDEN)
 
             # Retrieve the hashed OTP from the database and compare it
@@ -242,7 +242,7 @@ class ChangePassword(APIView):
                 if serializer.data["password1"] == serializer.data["password2"]:
                     user.set_password(serializer.data["password1"])
                     user.save()
-                    return Response({"success": "Password changed successfully"})
+                    return Response({"message": "Password changed successfully"})
 
                 return Response({"error": "Passwords do not match"})
 
@@ -298,7 +298,7 @@ class UserQueriesAPI(APIView):
                 # Append the data to the Google Sheets
                 worksheet.append_row(list(query_data))
 
-                return Response({"success": "Query submitted successfully"}, status=status.HTTP_201_CREATED)
+                return Response({"message": "Query submitted successfully"}, status=status.HTTP_201_CREATED)
 
 
 
