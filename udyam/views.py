@@ -37,7 +37,7 @@ class TeamCreateAPIView(APIView):
             if not leader.is_verified:
                 return Response({"error": "Leader not verified."},status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({"Error" : "Leader should be provided."},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error" : "Leader should be provided."},status=status.HTTP_400_BAD_REQUEST)
         
         # checking if same team name exists in the event
         if Team.objects.filter(event=event, team_name=team_name).exists():
@@ -103,27 +103,27 @@ class TeamInviteAPIView(APIView):
         
         # checking if the user posting the request is the leader (only leaders can invite)
         if requesting_user != team.leader:
-            return Response({"Error" : "Only a leader can invite other members"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"error" : "Only a leader can invite other members"}, status=status.HTTP_403_FORBIDDEN)
         
         #checking if the leader is verified
         if leader is not None:
             if not leader.is_verified:
-                return Response({"Error": "Leader not verified."},status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "Leader not verified."},status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({"Error" : "Leader should be provided."},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error" : "Leader should be provided."},status=status.HTTP_400_BAD_REQUEST)
         
         # checking if the member is verified
         if member is not None:
             if not member.is_verified:
-                return Response({"Error": "Member not verified."},status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "Member not verified."},status=status.HTTP_400_BAD_REQUEST)
             if member == leader or requesting_user == member:
-                return Response({"Error" : "Invalid invitation"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error" : "Invalid invitation"}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({"Error" : "Member should be provided."},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error" : "Member should be provided."},status=status.HTTP_400_BAD_REQUEST)
         
         # checking if the team sending the invite exists
         if not Team.objects.filter(event=event, team_name=team_name).exists():
-            return Response({"Error": "Team must exist."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Team must exist."}, status=status.HTTP_400_BAD_REQUEST)
         
         # checking if the member user if part of a team already
         if self.user_is_part_of_team(member, event):
@@ -131,10 +131,10 @@ class TeamInviteAPIView(APIView):
         
         if event.name in ['digisim', 'ichip', 'commnet', 'xiota']:
             if team.member1 is not None:
-                return Response({"Error": "Team is full"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "Team is full"}, status=status.HTTP_400_BAD_REQUEST)
 
         if team.member1 is not None and team.member2 is not None:
-            return Response({"Error": "Team is full"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Team is full"}, status=status.HTTP_400_BAD_REQUEST)
         
         # generating email link and sending the email
         link = self.generate_link(team_name, event_name, member_email)
@@ -202,13 +202,13 @@ class TeamJoinAPIView(APIView):
         # checking if the member is verified
         if member is not None:
             if not member.is_verified:
-                return Response({"Error": "Member not verified."},status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "Member not verified."},status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({"Error" : "Member should be provided."},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error" : "Member should be provided."},status=status.HTTP_400_BAD_REQUEST)
         
         # checking if the team exists
         if not Team.objects.filter(event=event, team_name=team_name).exists():
-            return Response({"Error": "Team must exist."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Team must exist."}, status=status.HTTP_400_BAD_REQUEST)
 
         # checking if the member user is already part of another team
         if self.user_is_part_of_team(member, event):
@@ -217,7 +217,7 @@ class TeamJoinAPIView(APIView):
         # checking if the team is full
         if event.name in ['digisim', 'ichip', 'commnet', 'xiota']:
             if team.member1 is not None:
-                return Response({"Error": "Team is full"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "Team is full"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 team.member1 = member
 
@@ -227,17 +227,17 @@ class TeamJoinAPIView(APIView):
             elif team.member2 is None:
                 team.member2 = member
             else:
-                return Response({"Error":"Team is full"})
+                return Response({"error":"Team is full"})
 
         team.save()
 
-        return Response({"Message" : f"{member_email} successfully joined team"})
+        return Response({"message" : f"{member_email} successfully joined team"})
 
     def get_user_instance_by_email(self, email):
         try:
             return User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({"Error" : "User does not exist"})
+            return Response({"error" : "User does not exist"})
     
     def user_is_part_of_team(self, user, event):
         return Team.objects.filter(event=event, leader=user).exists() or \
@@ -248,7 +248,7 @@ class TeamJoinAPIView(APIView):
         try:
             return Team.objects.filter(event=event,team_name=team_name).first()
         except Team.DoesNotExist:
-            return Response({"Error" : "Team does not exist"})
+            return Response({"error" : "Team does not exist"})
 
 
 class TeamDeleteAPIView(APIView):
@@ -263,44 +263,44 @@ class TeamDeleteAPIView(APIView):
         try:
             event = Event.objects.get(name=event_name)
         except Event.DoesNotExist:
-            return Response({"Error":"Event does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error":"Event does not exist"}, status=status.HTTP_400_BAD_REQUEST)
         
         leader = self.get_user_instance_by_email(leader_email)
         team = self.get_team_instance_by_team_name_and_event(team_name, event)
 
         requesting_user = request.user
         if requesting_user != leader:
-            return Response({"Error": "You can only delete a team if you are a team leader."},
+            return Response({"error": "You can only delete a team if you are a team leader."},
                             status=status.HTTP_403_FORBIDDEN)
         
         if requesting_user != team.leader:
-            return Response({"Error" : "User is not the leader of this team"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"error" : "User is not the leader of this team"}, status=status.HTTP_403_FORBIDDEN)
         
         if leader is not None:
             if not leader.is_verified:
-                return Response({"Error": "Leader not verified."},status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "Leader not verified."},status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({"Error" : "Leader should be provided."},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error" : "Leader should be provided."},status=status.HTTP_400_BAD_REQUEST)
         
         if not Team.objects.filter(event=event, team_name=team_name).exists():
-            return Response({"Error": "Team must exist."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Team must exist."}, status=status.HTTP_400_BAD_REQUEST)
         
         team.delete()
 
-        return Response({"Success" : f"Team {team_name} successfully deleted"}, status=status.HTTP_202_ACCEPTED)
+        return Response({"message" : f"Team {team_name} successfully deleted"}, status=status.HTTP_202_ACCEPTED)
 
     
     def get_team_instance_by_team_name_and_event(self, team_name, event):
         try:
             return Team.objects.filter(event=event,team_name=team_name).first()
         except Team.DoesNotExist:
-            return Response({"Error" : "Team does not exist"})
+            return Response({"error" : "Team does not exist"})
         
     def get_user_instance_by_email(self, email):
         try:
             return User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({"Error" : "User does not exist"})
+            return Response({"error" : "User does not exist"})
         
 
 class TeamAPIView(APIView):
